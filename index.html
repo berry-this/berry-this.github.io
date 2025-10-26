@@ -621,7 +621,7 @@
                 </div>
             </div>
 
-            <p style="margin-top: 2rem;">BerryOS "Aurora" · Based on Windows 11 25H2 · 2025</p>
+            <p style="margin-top: 2rem;">BerryOS "Aurora" · Based on Windows 11 25H2 · <a href="#" id="latest-commit" target="_blank" style="color: inherit; text-decoration: none;">...</a> · 2025</p>
         </footer>
     </div>
 
@@ -653,7 +653,40 @@
         if (savedLang) {
             setLanguage(savedLang, true);
         }
+
+        fetchLatestCommit('berry-this', 'berry-this.github.io', 'main'); 
     });
+
+    async function fetchLatestCommit(owner, repo, branch) {
+        const commitElement = document.getElementById('latest-commit');
+        if (!commitElement) return;
+        commitElement.textContent = 'checking...';
+
+        try {
+            const url = `https://api.github.com/repos/${owner}/${repo}/commits/${branch}`;
+            const response = await fetch(url, { cache: 'no-cache' });
+
+            if (!response.ok) {
+                throw new Error(`GitHub API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const sha = data.sha.substring(0, 7);
+            const date = new Date(data.commit.author.date).toISOString().split('T')[0];
+            
+            commitElement.textContent = `${sha} (${date})`;
+            commitElement.href = data.html_url;
+            commitElement.style.textDecoration = 'underline';
+            commitElement.style.textDecorationStyle = 'dotted';
+        } catch (error) {
+            console.error("Failed to fetch commit info:", error);
+            commitElement.textContent = 'latest';
+            commitElement.href = `https://github.com/${owner}/${repo}/commits/${branch}`;
+            commitElement.style.textDecoration = 'underline';
+            commitElement.style.textDecorationStyle = 'dotted';
+        }
+    }
+
 
     function setLanguage(lang, isInitial = false) {
         currentLang = lang;
