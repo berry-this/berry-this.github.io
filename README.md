@@ -25,4 +25,8 @@ This is an unofficial, modified version of Windows. It is provided 'as-is' witho
 
 ## License
 
-The code for this website and associated scripts are licensed under the [MIT License](LICENSE). The Windows components are subject to Microsoft's licensing terms.
+All content within this repository, including but not limited to: HTML code, CSS styles, JavaScript code, graphical assets (images, icons), textual content, and the overall site structure, is the intellectual property of the BerryOS project.
+
+**You are strictly prohibited from using, copying, modifying, or distributing the code and/or design of this website for your own or any third-party projects.**
+
+This website was created solely for the presentation of the BerryOS operating system. It is not a template or an open-source resource intended for public use.
