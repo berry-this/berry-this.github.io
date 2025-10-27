@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BerryOS 11 [Codename: Aurora]</title>
+	<link rel="preload" as="image" href="https://em-content.zobj.net/source/apple/419/black-heart_1f5a4.png">
     <style>
         * {
             margin: 0;
@@ -120,27 +121,27 @@
             margin-bottom: 0.5rem;
             color: #fff;
         }
-		
-		.typing-effect::after {
-			content: '|';
-			animation: blink 0.7s infinite;
-			margin-left: 0.1em;
-			color: #fff;
-		}
+        
+        .typing-effect::after {
+            content: '|';
+            animation: blink 0.7s infinite;
+            margin-left: 0.1em;
+            color: #fff;
+        }
 
-		@keyframes blink {
-			50% {
-				opacity: 0;
-			}
-		}
-		
-		#animated-text img {
-			width: 0.8em;
-			height: 0.8em;
-			display: inline-block;
-			vertical-align: -0.05em;
-			line-height: 1; 
-		}
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+        
+        #animated-text img {
+            width: 0.8em;
+            height: 0.8em;
+            display: inline-block;
+            vertical-align: -0.05em;
+            line-height: 1; 
+        }
 
         .build-info {
             color: #999;
@@ -172,7 +173,6 @@
             background: rgba(255, 255, 255, 0.12);
             border-color: rgba(255, 255, 255, 0.25);
         }
-
 
         .download-wrapper {
             position: relative;
@@ -311,6 +311,83 @@
             letter-spacing: 0.05em;
         }
 
+        .screenshots-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .screenshot-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .screenshot-item:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .screenshot-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .screenshot-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .screenshot-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .screenshot-overlay img {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 8px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .screenshot-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            transition: background 0.2s ease;
+        }
+
+        .screenshot-close:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
         footer {
             padding: 4rem 0 3rem;
             border-top: 1px solid #222;
@@ -445,9 +522,10 @@
                 font-size: 2.5rem;
             }
 
-            .grid {
+            .grid,
+            .screenshots-grid {
                 grid-template-columns: 1fr;
-                gap: 2rem;
+                gap: 1rem;
             }
 
             .stats {
@@ -470,6 +548,12 @@
             .modal-buttons {
                 flex-direction: column;
             }
+            .screenshots-title {
+                text-align: center;
+            }
+            .screenshots-section {
+                margin: 3rem 0;
+            }
         }
     </style>
 </head>
@@ -491,30 +575,29 @@
     </div>
 
     <div class="container">
-		<header>
-			<h1>BerryOS 11 // <span id="animated-text" class="typing-effect"></span></h1>
-			<p class="build-info">
-				<span data-en="Based on Windows 11 25H2 Build" data-ru="На базе Windows 11 25H2, билд">Based on Windows 11 25H2 Build</span> 
-				<span id="windowsBuild"></span> · 
-				<span data-en="Custom Build" data-ru="Кастомная сборка">Custom Build</span> 
-				<span id="customBuild"></span>
-			</p>
-			<p class="version" id="editionName"></p>
-			<div class="download-wrapper">
-				<a href="#" class="download" onclick="toggleDownload(event)" data-en="Download" data-ru="Скачать">Download</a>
-				<div class="download-menu" id="downloadMenu">
-					<div class="download-option" onclick="downloadVersion('aurora-no-defender')">
-						<div class="option-title" data-en='BerryOS 11 "Aurora"' data-ru='BerryOS 11 "Aurora"'>BerryOS 11 "Aurora"</div>
-						<div class="option-desc" data-en="The definitive build. All Microsoft security features and telemetry are permanently disabled for peak performance and true user sovereignty." data-ru="Основная сборка. Все встроенные механизмы безопасности и телеметрия Microsoft перманентно отключены для максимальной производительности и полного контроля.">The definitive build. All Microsoft security features and telemetry are permanently disabled for peak performance and true user sovereignty.</div>
-						<!-- <div class="option-warning" data-en="⚡ For users who manage their own security and reject system interference." data-ru="⚡ Для тех, кто сам выбирает свой стек безопасности и не терпит системного вмешательства.">⚡ For users who manage their own security and reject system interference.</div> -->
-					</div>
-					<div class="download-option option-placeholder">
-						<div class="option-title" data-en="[Soon..]" data-ru="[Скоро..]">[Soon..]</div>
-						<div class="option-desc" data-en="A future version that retains the default Microsoft security stack. For users who prefer a familiar, managed environment." data-ru="Будущая версия, сохраняющая стандартный стек безопасности Microsoft. Для пользователей, предпочитающих привычную, управляемую среду.">A future version that retains the default Microsoft security stack. For users who prefer a familiar, managed environment.</div>
-					</div>
-				</div>
-			</div>
-		</header>
+        <header>
+            <h1>BerryOS 11 // <span id="animated-text" class="typing-effect"></span></h1>
+            <p class="build-info">
+                <span data-en="Based on Windows 11 25H2 Build" data-ru="На базе Windows 11 25H2, билд">Based on Windows 11 25H2 Build</span> 
+                <span id="windowsBuild"></span> · 
+                <span data-en="Custom Build" data-ru="Кастомная сборка">Custom Build</span> 
+                <span id="customBuild"></span>
+            </p>
+            <p class="version" id="editionName"></p>
+            <div class="download-wrapper">
+                <a href="#" class="download" onclick="toggleDownload(event)" data-en="Download" data-ru="Скачать">Download</a>
+                <div class="download-menu" id="downloadMenu">
+                    <div class="download-option" onclick="downloadVersion('aurora-no-defender')">
+                        <div class="option-title" data-en='BerryOS 11 "Aurora"' data-ru='BerryOS 11 "Aurora"'>BerryOS 11 "Aurora"</div>
+                        <div class="option-desc" data-en="The definitive build. All Microsoft security features and telemetry are permanently disabled for peak performance and true user sovereignty." data-ru="Основная версия. Все функции безопасности и телеметрия Microsoft навсегда отключены для максимальной производительности и настоящего контроля."></div>
+                    </div>
+                    <div class="download-option option-placeholder">
+                        <div class="option-title" data-en="[Soon..]" data-ru="[Скоро..]">[Soon..]</div>
+                        <div class="option-desc" data-en="A future version that retains the default Microsoft security stack. For users who prefer a familiar, managed environment." data-ru="Будущая версия, сохраняющая стандартный стек безопасности Microsoft. Для тех, кто предпочитает привычное, управляемое окружение."></div>
+                    </div>
+                </div>
+            </div>
+        </header>
 
         <div class="stats">
             <div class="stat">
@@ -541,7 +624,7 @@
                 <div class="item">
                     <h3 data-en="Maximum Performance" data-ru="Максимум производительности">Maximum Performance</h3>
                     <p data-en="Resource-intensive background processes, telemetry, and spyware modules have been removed to significantly improve system responsiveness." 
-                       data-ru="Удалены ресурсоемкие фоновые процессы, телеметрия и шпионские модули для значительного повышения отзывчивости системы.">
+                       data-ru="Удалены ресурсоемкие фоновые процессы, телеметрия и шпионские модули для значительного улучшения отклика системы.">
                        Resource-intensive background processes, telemetry, and spyware modules have been removed to significantly improve system responsiveness.
                     </p>
                 </div>
@@ -562,14 +645,14 @@
                 <div class="item">
                     <h3 data-en="Privacy by Default" data-ru="Приватность по умолчанию">Privacy by Default</h3>
                     <p data-en="Microsoft Edge has been completely removed. Installation is only possible with a local account, without needing a Microsoft account." 
-                       data-ru="Браузер Microsoft Edge полностью удален. Установка возможна только с локальной учетной записью, без привязки к аккаунту Microsoft.">
+                       data-ru="Браузер Microsoft Edge полностью удален. Установка возможна только с локальной учетной записью, без необходимости в аккаунте Microsoft.">
                        Microsoft Edge has been completely removed. Installation is only possible with a local account, without needing a Microsoft account.
                     </p>
                 </div>
                 <div class="item">
                     <h3 data-en="Post-Install Helper" data-ru="Скрипт-помощник">Post-Install Helper</h3>
                     <p data-en="Includes a post-install script for optional deep telemetry cleaning, classic context menu tweaks, and quick download of popular browsers and software." 
-                       data-ru="Включает скрипт для опциональной глубокой очистки телеметрии, твиков (например, классическое меню) и быстрой загрузки популярного софта.">
+                       data-ru="Включает скрипт для опциональной глубокой очистки телеметрии, твиков (например, классическое контекстное меню) и быстрой загрузки популярных браузеров и ПО.">
                        Includes a post-install script for optional deep telemetry cleaning, classic context menu tweaks, and quick download of popular browsers and software.
                     </p>
                 </div>
@@ -601,12 +684,52 @@
             </ul>
         </section>
 
-        <footer>
-            <div class="links">
-                <a href="#">GitHub</a>
-                <a href="#" data-en="Docs" data-ru="Документация">Docs</a>
-                <a href="#">Changelog</a>
+        <section>
+            <h2 data-en="Screenshots" data-ru="Скриншоты">Screenshots</h2>
+            <div class="screenshots-grid">
+				<div class="screenshot-item" onclick="openScreenshot('https://cdn.jsdelivr.net/gh/berryos-windows/berryos-windows.github.io@103344c58e497763979300d8f4854406bc6cb86b/s1.png')">
+					<img src="https://cdn.jsdelivr.net/gh/berryos-windows/berryos-windows.github.io@103344c58e497763979300d8f4854406bc6cb86b/s1.png" alt="Clean Desktop">
+					<div class="screenshot-caption" data-en="Clean desktop after installation" data-ru="Чистый рабочий стол после установки">Clean desktop after installation</div>
+				</div>
+
+				<div class="screenshot-item" onclick="openScreenshot('https://cdn.jsdelivr.net/gh/berryos-windows/berryos-windows.github.io@103344c58e497763979300d8f4854406bc6cb86b/s3.png')">
+					<img src="https://cdn.jsdelivr.net/gh/berryos-windows/berryos-windows.github.io@103344c58e497763979300d8f4854406bc6cb86b/s3.png" alt="Minimal set of UWP apps">
+					<div class="screenshot-caption" data-en="Minimal set of UWP apps" data-ru="Минимальный набор UWP-приложений">Minimal set of UWP apps</div>
+				</div>
+
+				<div class="screenshot-item" onclick="openScreenshot('https://cdn.jsdelivr.net/gh/berryos-windows/berryos-windows.github.io@103344c58e497763979300d8f4854406bc6cb86b/s4.png')">
+					<img src="https://cdn.jsdelivr.net/gh/berryos-windows/berryos-windows.github.io@103344c58e497763979300d8f4854406bc6cb86b/s4.png" alt="Windows Update is disabled">
+					<div class="screenshot-caption" data-en="Windows Update is disabled" data-ru="Центр обновления Windows отключен">Windows Update is disabled</div>
+				</div>
+
+				<div class="screenshot-item" onclick="openScreenshot('https://cdn.jsdelivr.net/gh/berryos-windows/berryos-windows.github.io@103344c58e497763979300d8f4854406bc6cb86b/s5.png')">
+					<img src="https://cdn.jsdelivr.net/gh/berryos-windows/berryos-windows.github.io@103344c58e497763979300d8f4854406bc6cb86b/s5.png" alt="Microsoft Defender completely removed">
+					<div class="screenshot-caption" data-en="Microsoft Defender removed" data-ru="Microsoft Defender удален">Microsoft Defender removed</div>
+				</div>
+
+				<div class="screenshot-item" onclick="openScreenshot('https://cdn.jsdelivr.net/gh/berryos-windows/berryos-windows.github.io@103344c58e497763979300d8f4854406bc6cb86b/s6.png')">
+					<img src="https://cdn.jsdelivr.net/gh/berryos-windows/berryos-windows.github.io@103344c58e497763979300d8f4854406bc6cb86b/s6.png" alt="All telemetry disabled by default">
+					<div class="screenshot-caption" data-en="All telemetry disabled by default" data-ru="Вся телеметрия отключена">All telemetry disabled by default</div>
+				</div>
+
+				<div class="screenshot-item" onclick="openScreenshot('https://cdn.jsdelivr.net/gh/berryos-windows/berryos-windows.github.io@103344c58e497763979300d8f4854406bc6cb86b/s7.png')">
+					<img src="https://cdn.jsdelivr.net/gh/berryos-windows/berryos-windows.github.io@103344c58e497763979300d8f4854406bc6cb86b/s7.png" alt="Typing data collection is disabled">
+					<div class="screenshot-caption" data-en="Typing data collection disabled" data-ru="Сбор данных о вводе отключен">Typing data collection disabled</div>
+				</div>
             </div>
+        </section>
+
+        <footer>
+		<div class="links">
+				<a href="https://github.com/berryos-windows/berryos-windows.github.io" target="_blank" title="GitHub Project">
+					<!-- GitHub Logo SVG -->
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 16 16" fill="currentColor" role="img" aria-label="GitHub">
+						<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+					</svg>
+				</a>
+				<!-- <a href="#" data-en="Docs" data-ru="Документация">Docs</a> -->
+				<!-- <a href="#" id="changelogLink" data-en="Changelog" data-ru="Журнал изменений">Changelog</a> -->
+			</div>
             
             <div class="disclaimer-wrapper">
                 <button class="disclaimer-toggle" onclick="toggleDisclaimer()" 
@@ -614,9 +737,9 @@
                     Show Disclaimer
                 </button>
                 <div class="disclaimer-content" id="disclaimerContent">
-                    <p data-en-html="<strong>Disclaimer:</strong> Performance metrics are approximate and may vary depending on your hardware configuration, installed software, and system usage patterns. This is an unofficial modification of Windows 11 and is not affiliated with or endorsed by Microsoft Corporation. Use at your own risk. The author is not responsible for any damage, data loss, or other issues that may arise from using this build." 
-                       data-ru-html="<strong>Отказ от ответственности:</strong> Показатели производительности являются приблизительными и могут варьироваться в зависимости от конфигурации вашего оборудования, установленного ПО и характера использования системы. Это неофициальная модификация Windows 11, не связанная и не одобренная корпорацией Microsoft. Используйте на свой страх и риск. Автор не несёт ответственности за любой ущерб, потерю данных или другие проблемы, которые могут возникнуть при использовании данной сборки.">
-                        <strong>Disclaimer:</strong> Performance metrics are approximate and may vary depending on your hardware configuration, installed software, and system usage patterns. This is an unofficial modification of Windows 11 and is not affiliated with or endorsed by Microsoft Corporation. Use at your own risk. The author is not responsible for any damage, data loss, or other issues that may arise from using this build.
+                    <p data-en-html="<strong>Disclaimer:</strong> Performance metrics are approximate and may vary depending on your hardware configuration, installed software, and system usage patterns. This is an unofficial, modified version of Windows and is provided 'as-is' without any warranties. Use at your own risk. The author is not responsible for any potential data loss or system instability. It is strongly recommended to back up your data before installation."
+                       data-ru-html="<strong>Отказ от ответственности:</strong> Показатели производительности являются приблизительными и могут меняться в зависимости от конфигурации вашего оборудования, установленного ПО и характера использования системы. Это неофициальная, модифицированная версия Windows, предоставляемая 'как есть' без каких-либо гарантий. Используйте на свой страх и риск. Автор не несет ответственности за возможную потерю данных или нестабильность системы. Настоятельно рекомендуется сделать резервную копию данных перед установкой.">
+                        <strong>Disclaimer:</strong> Performance metrics are approximate and may vary depending on your hardware configuration, installed software, and system usage patterns. This is an unofficial, modified version of Windows and is provided 'as-is' without any warranties. Use at your own risk. The author is not responsible for any potential data loss or system instability. It is strongly recommended to back up your data before installation.
                     </p>
                 </div>
             </div>
@@ -624,180 +747,209 @@
             <p style="margin-top: 2rem;">BerryOS "Aurora" · Based on Windows 11 25H2 · <a href="#" id="latest-commit" target="_blank" style="color: inherit; text-decoration: none;">...</a> · 2025</p>
         </footer>
     </div>
+    
+    <div class="screenshot-overlay" id="screenshotOverlay">
+        <div class="screenshot-close" onclick="closeScreenshot()">×</div>
+        <img id="screenshotLarge" src="" alt="Screenshot Large">
+    </div>
 
-<script>
-    const config = {
-        windowsBuild: '26200.6584',
-        customBuild: 'Aurora v1.0',
-        editionName: 'Professional'
-    };
+    <script>
+        const config = {
+            windowsBuild: '26200.6584',
+            customBuild: 'Aurora v1.0',
+            editionName: 'Professional'
+        };
 
-    const typingConfig = {
-        words: {
-            en: ['Unchained', 'Stripped', 'Optimized', 'De-Bloated', 'Private', 'And just awesome ;)'],
-            ru: ['Свободная', 'Чистая', 'Оптимизированная', 'Без хлама', 'Приватная', 'И просто классная ;)']
-        },
-        typingSpeed: 150,
-        deletingSpeed: 75,
-        delay: 1500
-    };
+        const typingConfig = {
+            words: {
+                en: ['Unchained', 'Stripped', 'Optimized', 'De-Bloated', 'Private', 'And just awesome ;)'],
+                ru: ['Свободная', 'Чистая', 'Оптимизированная', 'Без хлама', 'Приватная', 'И просто классная ;)']
+            },
+            typingSpeed: 150,
+            deletingSpeed: 75,
+            delay: 1500
+        };
 
-    let currentLang = 'en';
-    let typingAnimationTimeoutId;
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('windowsBuild').textContent = config.windowsBuild;
-        document.getElementById('customBuild').textContent = config.customBuild;
-        document.getElementById('editionName').textContent = config.editionName;
+        let currentLang = 'en';
+        let typingAnimationTimeoutId;
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('windowsBuild').textContent = config.windowsBuild;
+            document.getElementById('customBuild').textContent = config.customBuild;
+            document.getElementById('editionName').textContent = config.editionName;
 
-        const savedLang = localStorage.getItem('preferredLanguage');
-        if (savedLang) {
-            setLanguage(savedLang, true);
-        }
-
-        fetchLatestCommit('berry-this', 'berry-this.github.io', 'main'); 
-    });
-
-    async function fetchLatestCommit(owner, repo, branch) {
-        const commitElement = document.getElementById('latest-commit');
-        if (!commitElement) return;
-        commitElement.textContent = 'checking...';
-
-        try {
-            const url = `https://api.github.com/repos/${owner}/${repo}/commits/${branch}`;
-            const response = await fetch(url, { cache: 'no-cache' });
-
-            if (!response.ok) {
-                throw new Error(`GitHub API error: ${response.status}`);
+            const savedLang = localStorage.getItem('preferredLanguage');
+            if (savedLang) {
+                setLanguage(savedLang, true);
             }
 
-            const data = await response.json();
-            const sha = data.sha.substring(0, 7);
-            const date = new Date(data.commit.author.date).toISOString().split('T')[0];
+            fetchLatestCommit('berryos-windows', 'berryos-windows.github.io', 'main'); 
+        });
+
+        async function fetchLatestCommit(owner, repo, branch) {
+            const commitElement = document.getElementById('latest-commit');
+            if (!commitElement) return;
+            commitElement.textContent = 'checking...';
+
+            try {
+                const url = `https://api.github.com/repos/${owner}/${repo}/commits/${branch}`;
+                const response = await fetch(url, { cache: 'no-cache' });
+
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const sha = data.sha.substring(0, 7);
+                const date = new Date(data.commit.author.date).toISOString().split('T')[0];
+                
+                commitElement.textContent = `${sha} (${date})`;
+                commitElement.href = data.html_url;
+                commitElement.style.textDecoration = 'underline';
+                commitElement.style.textDecorationStyle = 'dotted';
+            } catch (error) {
+                console.error("Failed to fetch commit info:", error);
+                commitElement.textContent = 'latest';
+                commitElement.href = `https://github.com/${owner}/${repo}/commits/${branch}`;
+                commitElement.style.textDecoration = 'underline';
+                commitElement.style.textDecorationStyle = 'dotted';
+            }
+        }
+
+        function setLanguage(lang, isInitial = false) {
+            currentLang = lang;
             
-            commitElement.textContent = `${sha} (${date})`;
-            commitElement.href = data.html_url;
-            commitElement.style.textDecoration = 'underline';
-            commitElement.style.textDecorationStyle = 'dotted';
-        } catch (error) {
-            console.error("Failed to fetch commit info:", error);
-            commitElement.textContent = 'latest';
-            commitElement.href = `https://github.com/${owner}/${repo}/commits/${branch}`;
-            commitElement.style.textDecoration = 'underline';
-            commitElement.style.textDecorationStyle = 'dotted';
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.textContent = el.getAttribute(`data-${lang}`) || el.getAttribute('data-en');
+            });
+
+            document.querySelectorAll('[data-en-html]').forEach(el => {
+                el.innerHTML = el.getAttribute(`data-${lang}-html`) || el.getAttribute('data-en-html');
+            });
+
+            updateDisclaimerButtonText();
+
+            document.getElementById('languageModal').classList.add('hidden');
+            localStorage.setItem('preferredLanguage', lang);
+
+            if (typingAnimationTimeoutId) {
+                clearTimeout(typingAnimationTimeoutId);
+            }
+
+            startTypingAnimation();
         }
-    }
-
-
-    function setLanguage(lang, isInitial = false) {
-        currentLang = lang;
         
-        document.querySelectorAll('[data-en]').forEach(el => {
-            el.textContent = el.getAttribute(`data-${lang}`) || el.getAttribute('data-en');
-        });
+        function startTypingAnimation() {
+            const animatedTextEl = document.getElementById('animated-text');
+            if (!animatedTextEl) return;
+            
+            animatedTextEl.textContent = '';
+            animatedTextEl.classList.remove('finished');
 
-        document.querySelectorAll('[data-en-html]').forEach(el => {
-            el.innerHTML = el.getAttribute(`data-${lang}-html`) || el.getAttribute('data-en-html');
-        });
+            const words = typingConfig.words[currentLang];
+            let wordIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
 
-        updateDisclaimerButtonText();
+            function type() {
+                const currentWord = words[wordIndex];
+                let timeout = typingConfig.typingSpeed;
 
-        document.getElementById('languageModal').classList.add('hidden');
-        localStorage.setItem('preferredLanguage', lang);
+                if (isDeleting) {
+                    animatedTextEl.textContent = currentWord.substring(0, charIndex - 1);
+                    charIndex--;
+                    timeout = typingConfig.deletingSpeed;
+                } else {
+                    animatedTextEl.textContent = currentWord.substring(0, charIndex + 1);
+                    charIndex++;
+                }
 
-        if (typingAnimationTimeoutId) {
-            clearTimeout(typingAnimationTimeoutId);
+                if (!isDeleting && charIndex === currentWord.length) {
+                    isDeleting = true;
+                    timeout = typingConfig.delay;
+                } else if (isDeleting && charIndex === 0) {
+                    if (wordIndex === words.length - 1) {
+                        animatedTextEl.innerHTML = '<img src="https://em-content.zobj.net/source/apple/419/black-heart_1f5a4.png" alt="Heart">';
+                        animatedTextEl.classList.add('finished');
+                        clearTimeout(typingAnimationTimeoutId);
+                        return;
+                    }
+
+                    isDeleting = false;
+                    wordIndex++;
+                }
+
+                typingAnimationTimeoutId = setTimeout(type, timeout);
+            }
+            
+            type();
         }
 
-        startTypingAnimation();
-    }
-    
-	function startTypingAnimation() {
-		const animatedTextEl = document.getElementById('animated-text');
-		if (!animatedTextEl) return;
-		
-		animatedTextEl.textContent = '';
-		animatedTextEl.classList.remove('finished');
-
-		const words = typingConfig.words[currentLang];
-		let wordIndex = 0;
-		let charIndex = 0;
-		let isDeleting = false;
-
-		function type() {
-			const currentWord = words[wordIndex];
-			let timeout = typingConfig.typingSpeed;
-
-			if (isDeleting) {
-				animatedTextEl.textContent = currentWord.substring(0, charIndex - 1);
-				charIndex--;
-				timeout = typingConfig.deletingSpeed;
-			} else {
-				animatedTextEl.textContent = currentWord.substring(0, charIndex + 1);
-				charIndex++;
-			}
-
-			if (!isDeleting && charIndex === currentWord.length) {
-				isDeleting = true;
-				timeout = typingConfig.delay;
-			} else if (isDeleting && charIndex === 0) {
-				if (wordIndex === words.length - 1) {
-					animatedTextEl.innerHTML = '<img src="https://em-content.zobj.net/source/apple/419/black-heart_1f5a4.png" alt="Heart">';
-					animatedTextEl.classList.add('finished');
-					clearTimeout(typingAnimationTimeoutId);
-					return;
-				}
-
-				isDeleting = false;
-				wordIndex++;
-			}
-
-			typingAnimationTimeoutId = setTimeout(type, timeout);
-		}
-		
-		type();
-	}
-
-
-    function toggleDownload(e) {
-        e.preventDefault();
-        document.getElementById('downloadMenu').classList.toggle('open');
-    }
-
-    function downloadVersion(version) {
-        const downloadLinks = {
-            'aurora-no-defender': 'https://transfer.it/t/6HDVRU9TVT5Z'
-        };
-        if (downloadLinks[version]) {
-            window.location.href = downloadLinks[version];
-        } else {
-            alert('Download link for ' + version + ' not configured.');
+        function toggleDownload(e) {
+            e.preventDefault();
+            document.getElementById('downloadMenu').classList.toggle('open');
         }
-        document.getElementById('downloadMenu').classList.remove('open');
-    }
 
-    document.addEventListener('click', (e) => {
-        const wrapper = document.querySelector('.download-wrapper');
-        if (wrapper && !wrapper.contains(e.target)) {
+        function downloadVersion(version) {
+            const downloadLinks = {
+                'aurora-no-defender': 'https://transfer.it/t/6HDVRU9TVT5Z'
+            };
+            if (downloadLinks[version]) {
+                window.location.href = downloadLinks[version];
+            } else {
+                alert('Download link for ' + version + ' not configured.');
+            }
             document.getElementById('downloadMenu').classList.remove('open');
         }
-    });
 
-    function toggleDisclaimer() {
-        document.getElementById('disclaimerContent').classList.toggle('open');
-        updateDisclaimerButtonText();
-    }
+        document.addEventListener('click', (e) => {
+            const wrapper = document.querySelector('.download-wrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                document.getElementById('downloadMenu').classList.remove('open');
+            }
+        });
 
-    function updateDisclaimerButtonText() {
-        const content = document.getElementById('disclaimerContent');
-        const btn = document.querySelector('.disclaimer-toggle');
-        const isOpen = content.classList.contains('open');
-        
-        if (isOpen) {
-            btn.textContent = currentLang === 'en' ? 'Hide Disclaimer' : 'Скрыть отказ от ответственности';
-        } else {
-            btn.textContent = currentLang === 'en' ? 'Show Disclaimer' : 'Показать отказ от ответственности';
+        function toggleDisclaimer() {
+            document.getElementById('disclaimerContent').classList.toggle('open');
+            updateDisclaimerButtonText();
         }
-    }
-</script>
+
+        function updateDisclaimerButtonText() {
+            const content = document.getElementById('disclaimerContent');
+            const btn = document.querySelector('.disclaimer-toggle');
+            const isOpen = content.classList.contains('open');
+            
+            if (isOpen) {
+                btn.textContent = currentLang === 'en' ? 'Hide Disclaimer' : 'Скрыть отказ от ответственности';
+            } else {
+                btn.textContent = currentLang === 'en' ? 'Show Disclaimer' : 'Показать отказ от ответственности';
+            }
+        }
+        
+        function openScreenshot(imgSrc) {
+            const overlay = document.getElementById('screenshotOverlay');
+            const largeImg = document.getElementById('screenshotLarge');
+            largeImg.src = imgSrc;
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeScreenshot() {
+            const overlay = document.getElementById('screenshotOverlay');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('screenshotOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'screenshotOverlay') {
+                closeScreenshot();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeScreenshot();
+            }
+        });
+    </script>
 </body>
 </html>
